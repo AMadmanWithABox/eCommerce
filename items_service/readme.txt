@@ -1,0 +1,2 @@
+To run the data generator, you just need to run the file data_generator.p. The data generator will then create a file called sample_data.json
+You will then need to uncomment lines 81-89 in app.py. I found a better way to do this in the BasketService.

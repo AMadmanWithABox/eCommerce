@@ -1,0 +1,81 @@
+#Kong is my gateway service. It is a cloud gateway and it will not be able to be inside my docker compose file
+version: "3.8"
+services:
+  items_service:
+    build: ./items_service
+    ports:
+      - "5000-5002:5000"
+#    expose:
+#      - "5000"
+#      - "5001"
+#      - "5002"
+    depends_on:
+      - mongo
+    links:
+      - "mongo:mongo"
+    deploy:
+      mode: replicated
+      replicas: 3
+  basket_service:
+    build: ./basket_service
+    ports:
+      - "5003-5005:5001"
+#    expose:
+#      - "5003"
+#      - "5004"
+#      - "5005"
+    depends_on:
+      - items_service
+      - redis
+    links:
+      - "redis:redis"
+      - "items_service:items_service"
+    deploy:
+      mode: replicated
+      replicas: 3
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+  couchdb:
+    image: couchdb
+    ports:
+      - "5984:5984"
+    expose:
+      - "5984"
+    environment:
+      COUCHDB_USER: "admin"
+      COUCHDB_PASSWORD: "password"
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6380"
+  order_service:
+    build: ./order_service
+    ports:
+      - "5006-5008:5002"
+#    expose:
+#      - "5006"
+#      - "5007"
+#      - "5008"
+    depends_on:
+      - couchdb
+    links:
+      - "couchdb:couchdb"
+    deploy:
+      mode: replicated
+      replicas: 3
+#  data_generator:
+#    build: ./data_generator
+#    links:
+#      - "basket_service:basket_service"
+#      - "items_service:items_service"
+#    depends_on:
+#      - items_service
+#      - basket_service
+#      - mongo
+#      - redis
